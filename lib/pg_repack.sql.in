@@ -108,8 +108,7 @@ LANGUAGE sql STABLE STRICT;
 CREATE FUNCTION repack.get_enable_trigger(relid oid)
   RETURNS text AS
 $$
-  SELECT 'ALTER TABLE ' || repack.oid2text($1) ||
-    ' ENABLE ALWAYS TRIGGER repack_trigger';
+  SELECT 'SELECT run_command_on_shards(''' || repack.oid2text($1) || ''', $cmd$ ALTER TABLE %s ENABLE ALWAYS TRIGGER repack_trigger $cmd$)';
 $$
 LANGUAGE sql STABLE STRICT;
 
