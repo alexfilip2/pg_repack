@@ -99,7 +99,7 @@ LANGUAGE sql STABLE STRICT;
 CREATE FUNCTION repack.get_create_trigger(relid oid, pkid oid)
   RETURNS text AS
 $$
-  SELECT 'run_command_on_shards(''' || repack.oid2text($1) || ''', $cmd$ CREATE TRIGGER repack_trigger' ||
+  SELECT 'SELECT run_command_on_shards(''' || repack.oid2text($1) || ''', $cmd$ CREATE TRIGGER repack_trigger' ||
          ' AFTER INSERT OR DELETE OR UPDATE ON %s FOR EACH ROW EXECUTE PROCEDURE repack.repack_trigger(' ||
          repack.get_index_columns($2) || ') $cmd$ )';
 $$
