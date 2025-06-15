@@ -51,7 +51,7 @@ LANGUAGE C STABLE STRICT;
 CREATE FUNCTION repack.create_log_table(oid) RETURNS void AS
 $$
 BEGIN
-    EXECUTE 'SELECT run_command_on_shards('accounts', $cmd$ CREATE TABLE repack.log_' || $1 ||
+    EXECUTE 'SELECT run_command_on_shards('''accounts''', $cmd$ CREATE TABLE repack.log_' || $1 ||
             ' (id bigserial PRIMARY KEY,' ||
             ' pk repack.pk_' || $1 || ',' ||
             ' row ' || repack.oid2text($1) || ') $cmd$ )';
@@ -62,11 +62,11 @@ LANGUAGE plpgsql;
 CREATE FUNCTION repack.create_table(oid, name) RETURNS void AS
 $$
 BEGIN
-    EXECUTE 'CREATE TABLE repack.table_' || $1 ||
+    EXECUTE 'SELECT run_command_on_shards('''accounts''', $cmd$ CREATE TABLE repack.table_' || $1 ||
             ' WITH (' || repack.get_storage_param($1) || ') ' ||
             ' TABLESPACE ' || quote_ident($2) ||
             ' AS SELECT ' || repack.get_columns_for_create_as($1) ||
-            ' FROM ONLY ' || repack.oid2text($1) || ' WITH NO DATA';
+            ' FROM ONLY ' || repack.oid2text($1) || ' WITH NO DATA $cmd$ )';
 END
 $$
 LANGUAGE plpgsql;
