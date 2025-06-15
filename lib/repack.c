@@ -352,7 +352,7 @@ repack_apply(PG_FUNCTION_ARGS)
 		 * since SPI_processed > 0
 		 */
 		Assert(i > 0);
-		appendStringInfoString(&sql_pop, ");");
+		appendStringInfoString(&sql_pop, ") $cmd$);");
 
 		/* Bulk delete of processed rows from the log table */
 		execute(SPI_OK_DELETE, sql_pop.data);

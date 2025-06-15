@@ -299,17 +299,17 @@ CREATE VIEW repack.tables AS
          repack.get_enable_trigger(R.oid) as enable_trigger,
          'SELECT repack.create_table($1, $2)'::text AS create_table,
          coalesce(S.spcname, S2.spcname) AS tablespace_orig,
-         'INSERT INTO repack.table_' || R.oid || ' SELECT ' || repack.get_columns_for_create_as(R.oid) || ' FROM ONLY ' || repack.oid2text(R.oid) AS copy_data,
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ INSERT INTO repack.table_' || R.oid || ' SELECT ' || repack.get_columns_for_create_as(R.oid) || ' FROM ONLY ' || repack.oid2text(R.oid) || ' $cmd$)' AS copy_data,
          repack.get_alter_col_storage(R.oid) AS alter_col_storage,
          repack.get_drop_columns(R.oid, 'repack.table_' || R.oid) AS drop_columns,
-         'DELETE FROM repack.log_' || R.oid AS delete_log,
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ DELETE FROM repack.log_' || R.oid || ' $cmd$)' AS delete_log,
          'LOCK TABLE ' || repack.oid2text(R.oid) || ' IN ACCESS EXCLUSIVE MODE' AS lock_table,
          repack.get_order_by(CK.indexrelid, R.oid) AS ckey,
-         'SELECT * FROM repack.log_' || R.oid || ' ORDER BY id LIMIT $1' AS sql_peek,
-         'INSERT INTO repack.table_' || R.oid || ' VALUES ($1.*)' AS sql_insert,
-         'DELETE FROM repack.table_' || R.oid || ' WHERE ' || repack.get_compare_pkey(PK.indexrelid, '$1') AS sql_delete,
-         'UPDATE repack.table_' || R.oid || ' SET ' || repack.get_assign(R.oid, '$2') || ' WHERE ' || repack.get_compare_pkey(PK.indexrelid, '$1') AS sql_update,
-         'DELETE FROM repack.log_' || R.oid || ' WHERE id IN (' AS sql_pop
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ SELECT * FROM repack.log_' || R.oid || ' ORDER BY id LIMIT $1 $cmd$)' AS sql_peek,
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ INSERT INTO repack.table_' || R.oid || ' VALUES ($1.*) $cmd$)' AS sql_insert,
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ DELETE FROM repack.table_' || R.oid || ' WHERE ' || repack.get_compare_pkey(PK.indexrelid, '$1') || ' $cmd$)' AS sql_delete,
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ UPDATE repack.table_' || R.oid || ' SET ' || repack.get_assign(R.oid, '$2') || ' WHERE ' || repack.get_compare_pkey(PK.indexrelid, '$1') || ' $cmd$)' AS sql_update,
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ DELETE FROM repack.log_' || R.oid || ' WHERE id IN (' AS sql_pop
     FROM pg_class R
          LEFT JOIN pg_class T ON R.reltoastrelid = T.oid
          LEFT JOIN repack.primary_keys PK
