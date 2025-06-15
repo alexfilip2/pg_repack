@@ -1391,7 +1391,7 @@ repack_one_table(repack_table *table, const char *orderby)
 	command(table->create_trigger, 0, NULL);
 	temp_obj_num++;
 	command(table->enable_trigger, 0, NULL);
-	printfStringInfo(&sql, "SELECT repack.disable_autovacuum('repack.log_%u')", table->target_oid);
+	printfStringInfo(&sql, "SELECT run_command_on_shards('accounts', $cmd$ SELECT repack.disable_autovacuum('repack.log_%u') $cmd$)", table->target_oid);
 	command(sql.data, 0, NULL);
 
 	/* While we are still holding an AccessExclusive lock on the table, submit
