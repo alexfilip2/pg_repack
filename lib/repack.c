@@ -1032,7 +1032,7 @@ repack_swap(PG_FUNCTION_ARGS)
 	/* drop repack trigger */
 	execute_with_format(
 		SPI_OK_UTILITY,
-		"DROP TRIGGER IF EXISTS repack_trigger ON %s.%s CASCADE",
+		"SELECT run_command_on_shards('accounts', $cmd$ DROP TRIGGER IF EXISTS repack_trigger ON %s.%s CASCADE $cmd$)",
 		nspname, relname);
 
 	SPI_finish();
@@ -1132,7 +1132,7 @@ repack_drop(PG_FUNCTION_ARGS)
 	{
 		execute_with_format(
 			SPI_OK_UTILITY,
-			"DROP TRIGGER IF EXISTS repack_trigger ON %s.%s CASCADE",
+			"SELECT run_command_on_shards('accounts', $cmd$ DROP TRIGGER IF EXISTS repack_trigger ON %s.%s CASCADE $cmd$)",
 			nspname, relname);
 		--numobj;
 	}
