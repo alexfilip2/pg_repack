@@ -51,7 +51,7 @@ LANGUAGE C STABLE STRICT;
 CREATE FUNCTION repack.create_log_table(oid) RETURNS void AS
 $$
 BEGIN
-    EXECUTE 'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ CREATE TABLE repack.log_' || $1 ||
+    EXECUTE 'SELECT run_command_on_shards(''' || repack.oid2text($1) || ''', $cmd$ CREATE TABLE repack.log_' || $1 ||
             ' (id bigserial PRIMARY KEY,' ||
             ' pk repack.pk_' || $1 || ',' ||
             ' row ' || repack.oid2text($1) || ') $cmd$ )';
@@ -296,7 +296,7 @@ CREATE VIEW repack.tables AS
          PK.indexrelid AS pkid,
          CK.indexrelid AS ckid,
          'SELECT repack.create_index_type(' || PK.indexrelid || ',' || R.oid || ')' AS create_pktype,
-         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ SELECT repack.create_log_table(' || R.oid || ') $cmd$ )' AS create_log,
+         'SELECT repack.create_log_table(' || R.oid || ')' AS create_log,
          repack.get_create_trigger(R.oid, PK.indexrelid) AS create_trigger,
          repack.get_enable_trigger(R.oid) as enable_trigger,
          'SELECT repack.create_table($1, $2)'::text AS create_table,
