@@ -62,11 +62,13 @@ LANGUAGE plpgsql;
 CREATE FUNCTION repack.create_table(oid, name) RETURNS void AS
 $$
 BEGIN
-    EXECUTE 'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ CREATE TABLE repack.table_' || $1 ||
+    EXECUTE 'CREATE TABLE repack.table_' || $1 ||
             ' WITH (' || repack.get_storage_param($1) || ') ' ||
             ' TABLESPACE ' || quote_ident($2) ||
             ' AS SELECT ' || repack.get_columns_for_create_as($1) ||
-            ' FROM ONLY ' || repack.oid2text($1) || ' WITH NO DATA $cmd$ )';
+            ' FROM ONLY ' || repack.oid2text($1) || ' WITH NO DATA';
+
+    EXECUTE 'SELECT create_distributed_table(''repack.table_' || $1 || ''', ''pubkey'', colocate_with => ''accounts'')';
 END
 $$
 LANGUAGE plpgsql;
@@ -294,7 +296,7 @@ CREATE VIEW repack.tables AS
          PK.indexrelid AS pkid,
          CK.indexrelid AS ckid,
          'SELECT repack.create_index_type(' || PK.indexrelid || ',' || R.oid || ')' AS create_pktype,
-         'SELECT repack.create_log_table(' || R.oid || ')' AS create_log,
+         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ SELECT repack.create_log_table(' || R.oid || ') $cmd$ )' AS create_log,
          repack.get_create_trigger(R.oid, PK.indexrelid) AS create_trigger,
          repack.get_enable_trigger(R.oid) as enable_trigger,
          'SELECT repack.create_table($1, $2)'::text AS create_table,
