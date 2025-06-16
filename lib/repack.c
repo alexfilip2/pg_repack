@@ -1142,7 +1142,7 @@ repack_drop(PG_FUNCTION_ARGS)
 	{
 		execute_with_format(
 			SPI_OK_UTILITY,
-			"SELECT run_command_on_shards('accounts', $cmd$ DROP TABLE IF EXISTS repack.table_%u CASCADE $cmd$)",
+			"DROP TABLE IF EXISTS repack.table_%u CASCADE",
 			oid);
 		--numobj;
 	}
@@ -1162,7 +1162,7 @@ repack_disable_autovacuum(PG_FUNCTION_ARGS)
 
 	execute_with_format(
 		SPI_OK_UTILITY,
-		"SELECT run_command_on_shards('accounts', $cmd$ ALTER TABLE %s SET (autovacuum_enabled = off) $cmd$)",
+		"ALTER TABLE %s SET (autovacuum_enabled = off)",
 		get_relation_name(oid));
 
 	SPI_finish();
