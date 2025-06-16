@@ -54,7 +54,7 @@ BEGIN
     EXECUTE 'SELECT run_command_on_shards(''' || repack.oid2text($1) || ''', $cmd$ CREATE TABLE repack.log_' || $1 ||
             ' (id bigserial PRIMARY KEY,' ||
             ' pk repack.pk_' || $1 || ',' ||
-            ' row ' || '%s::regclass' || ') $cmd$ )';
+            ' row %s ) $cmd$ )';
 END
 $$
 LANGUAGE plpgsql;
