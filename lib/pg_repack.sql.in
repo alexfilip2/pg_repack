@@ -301,7 +301,7 @@ CREATE VIEW repack.tables AS
          repack.get_enable_trigger(R.oid) as enable_trigger,
          'SELECT repack.create_table($1, $2)'::text AS create_table,
          coalesce(S.spcname, S2.spcname) AS tablespace_orig,
-         'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ INSERT INTO repack.table_' || R.oid || ' SELECT ' || repack.get_columns_for_create_as(R.oid) || ' FROM ONLY ' || repack.oid2text(R.oid) AS copy_data,
+         'INSERT INTO repack.table_' || R.oid || ' SELECT ' || repack.get_columns_for_create_as(R.oid) || ' FROM ONLY ' || repack.oid2text(R.oid) AS copy_data,
          repack.get_alter_col_storage(R.oid) AS alter_col_storage,
          repack.get_drop_columns(R.oid, 'repack.table_' || R.oid) AS drop_columns,
          'SELECT run_command_on_shards(''' || 'accounts' || ''', $cmd$ DELETE FROM repack.log_' || R.oid || ' $cmd$)' AS delete_log,

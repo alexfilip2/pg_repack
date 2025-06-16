@@ -969,7 +969,6 @@ repack_one_database(const char *orderby, char *errbuf, size_t errsize)
 			appendStringInfoString(&copy_sql, " ORDER BY ");
 			appendStringInfoString(&copy_sql, orderby);
 		}
-		appendStringInfoString(&copy_sql, " $cmd$)");
 		table.copy_data = copy_sql.data;
 
 		repack_one_table(&table, orderby);
