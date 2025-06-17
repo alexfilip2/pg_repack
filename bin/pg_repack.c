@@ -1386,6 +1386,13 @@ repack_one_table(repack_table *table, const char *orderby)
 
 	command(table->create_pktype, 0, NULL);
 	temp_obj_num++;
+	printfStringInfo(
+		&sql, "SELECT run_command_on_shards('%s', $cmd$ CREATE TABLE repack.log_%u(id bigserial PRIMARY KEY, pk repack.pk_%u, row %%s) $cmd$)",
+		table-> target_name,
+		table->target_oid,
+		table->target_oid,
+	);
+	command(sql.data, 0, NULL);
 	command(table->create_log, 0, NULL);
 	temp_obj_num++;
 	command(table->create_trigger, 0, NULL);
